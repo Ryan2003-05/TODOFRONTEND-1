@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://todobackend-1-5u6p.onrender.com/api';
 
 export type Priority = 'Urgente' | 'Moyenne' | 'Basse';
 
