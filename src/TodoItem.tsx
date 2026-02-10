@@ -4,7 +4,7 @@ import { useState } from "react";
 type Priority = "Urgente" | "Moyenne" | "Basse"
 
 type Todo = {
-  _id: number;
+  _id: string;
   text: string;
   priority: Priority;
   completed: boolean; 
