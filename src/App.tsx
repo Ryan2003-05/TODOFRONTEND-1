@@ -30,7 +30,7 @@ function App() {
       setTodos(data);
     } catch (error) {
       console.error("Erreur lors du chargement:", error);
-      alert(" Erreur de connexion au serveur. Vérifiez que le backend est démarré.");
+      alert("Erreur de connexion au serveur.");
     } finally {
       setLoading(false);
     }
@@ -41,29 +41,31 @@ function App() {
 
     try {
       const newTodo = await api.createTodo(input.trim(), priority);
-      setTodos([newTodo, ...todos]);
+      setTodos(prev => [newTodo, ...prev]);
       setInput("");
       setPriority("Moyenne");
     } catch (error) {
       console.error("Erreur lors de l'ajout:", error);
-      alert(" Erreur lors de l'ajout");
     }
   }
 
   async function deleteTodo(id: string) {
     try {
       await api.deleteTodo(id);
-      setTodos(todos.filter((todo) => todo._id !== id));
+      setTodos(prev => prev.filter(todo => todo._id !== id));
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
-      alert(" Erreur lors de la suppression");
     }
   }
 
   async function toggleComplete(id: string) {
     try {
       const updatedTodo = await api.toggleTodoComplete(id);
-      setTodos(todos.map((todo) => (todo._id === id ? updatedTodo : todo)));
+      setTodos(prev =>
+        prev.map(todo =>
+          todo._id === updatedTodo._id ? updatedTodo : todo
+        )
+      );
     } catch (error) {
       console.error("Erreur lors du toggle:", error);
     }
@@ -72,7 +74,11 @@ function App() {
   async function editTodo(id: string, newText: string, newPriority: Priority) {
     try {
       const updatedTodo = await api.updateTodo(id, newText, newPriority);
-      setTodos(todos.map((todo) => (todo._id === id ? updatedTodo : todo)));
+      setTodos(prev =>
+        prev.map(todo =>
+          todo._id === updatedTodo._id ? updatedTodo : todo
+        )
+      );
     } catch (error) {
       console.error("Erreur lors de la modification:", error);
     }
@@ -83,17 +89,17 @@ function App() {
   if (filter === "Tous") {
     filteredTodos = todos;
   } else if (filter === "Terminées") {
-    filteredTodos = todos.filter((todo) => todo.completed);
+    filteredTodos = todos.filter(todo => todo.completed);
   } else {
     filteredTodos = todos.filter(
-      (todo) => todo.priority === filter && !todo.completed
+      todo => todo.priority === filter && !todo.completed
     );
   }
 
-  const urgentCount = todos.filter((t) => t.priority === "Urgente" && !t.completed).length;
-  const mediumCount = todos.filter((t) => t.priority === "Moyenne" && !t.completed).length;
-  const lowCount = todos.filter((t) => t.priority === "Basse" && !t.completed).length;
-  const completedCount = todos.filter((t) => t.completed).length;
+  const urgentCount = todos.filter(t => t.priority === "Urgente" && !t.completed).length;
+  const mediumCount = todos.filter(t => t.priority === "Moyenne" && !t.completed).length;
+  const lowCount = todos.filter(t => t.priority === "Basse" && !t.completed).length;
+  const completedCount = todos.filter(t => t.completed).length;
   const totalCount = todos.length;
 
   if (loading) {
@@ -108,7 +114,7 @@ function App() {
     <div className="flex justify-center">
       <div className="w-2/3 flex flex-col gap-4 my-15 bg-base-300 p-5 rounded-2xl">
         <h1 className="text-3xl font-bold text-center">Ma Todo Liste 📝</h1>
-        
+
         <div className="flex gap-4">
           <input
             type="text"
@@ -134,7 +140,7 @@ function App() {
           </button>
         </div>
 
-        <div className="space-y-2 flex-1 h-fit">
+        <div className="space-y-2 flex-1">
           <div className="flex flex-wrap gap-4">
             <button
               className={`btn btn-soft ${filter === "Tous" ? "btn-primary" : ""}`}
@@ -174,24 +180,21 @@ function App() {
 
           {filteredTodos.length > 0 ? (
             <ul className="divide-y divide-primary/20">
-              {filteredTodos.map((todo) => (
-                <li key={todo._id}>
-                  <TodoItem
-                    todo={todo}
-                    onDelete={() => deleteTodo(todo._id)}
-                    onToggleComplete={() => toggleComplete(todo._id)}
-                    onEdit={(newText, newPriority) =>
-                      editTodo(todo._id, newText, newPriority)
-                    }
-                  />
-                </li>
+              {filteredTodos.map(todo => (
+                <TodoItem
+                  key={todo._id}
+                  todo={todo}
+                  onDelete={() => deleteTodo(todo._id)}
+                  onToggleComplete={() => toggleComplete(todo._id)}
+                  onEdit={(newText, newPriority) =>
+                    editTodo(todo._id, newText, newPriority)
+                  }
+                />
               ))}
             </ul>
           ) : (
             <div className="flex justify-center items-center flex-col p-5">
-              <div>
-                <Construction strokeWidth={1} className="w-40 h-40 text-primary" />
-              </div>
+              <Construction className="w-40 h-40 text-primary" />
               <p className="text-sm">Aucune tâche pour ce filtre</p>
             </div>
           )}
