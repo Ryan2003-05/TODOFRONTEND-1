@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || 'https://todobackend-1-jy9e.onrender.com/api';
 
 export type Priority = 'Urgente' | 'Moyenne' | 'Basse';
 
