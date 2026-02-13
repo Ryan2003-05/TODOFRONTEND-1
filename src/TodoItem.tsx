@@ -1,42 +1,43 @@
-import { Trash, Pencil, Check } from "lucide-react"
-import { useState } from "react"
+import { Trash, Edit, Check, X } from "lucide-react";
+import { useState } from "react";
 
-type Priority = "Urgente" | "Moyenne" | "Basse"
+type Priority = "Urgente" | "Moyenne" | "Basse";
 
 type Todo = {
-  id: number
-  text: string
-  priority: Priority
-}
+  id: number;
+  text: string;
+  priority: Priority;
+};
 
 type Props = {
-  todo: Todo
-  onDelete: () => void
-  isSelected: boolean
-  onToggleSelect: (id: number) => void
-  onUpdate: (id: number, newText: string) => void
-}
+  todo: Todo;
+  isSelected: boolean;
+  onDelete: () => void;
+  onToggleSelect: (id: number) => void;
+  onUpdate: (id: number, newText: string, newPriority: Priority) => void;
+};
 
-const TodoItem = ({
-  todo,
-  onDelete,
-  isSelected,
-  onToggleSelect,
-  onUpdate,
-}: Props) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedText, setEditedText] = useState(todo.text)
+const TodoItem = ({ todo, isSelected, onDelete, onToggleSelect, onUpdate }: Props) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+  const [editPriority, setEditPriority] = useState(todo.priority);
 
-  function validateEdit() {
-    if (editedText.trim() === "") return
-    onUpdate(todo.id, editedText.trim())
-    setIsEditing(false)
+  function handleSaveEdit() {
+    if (editText.trim() === "") return;
+    onUpdate(todo.id, editText.trim(), editPriority);
+    setIsEditing(false);
+  }
+
+  function handleCancelEdit() {
+    setEditText(todo.text);
+    setEditPriority(todo.priority);
+    setIsEditing(false);
   }
 
   return (
     <li className="p-3">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 w-full">
+      <div className="flex justify-between items-center gap-2">
+        <div className="flex items-center gap-2 flex-1">
           <input
             type="checkbox"
             className="checkbox checkbox-primary checkbox-sm"
@@ -44,69 +45,85 @@ const TodoItem = ({
             onChange={() => onToggleSelect(todo.id)}
           />
 
-          {/* ✏️ Texte / Édition */}
           {isEditing ? (
-            <input
-              type="text"
-              className="input input-sm w-full"
-              value={editedText}
-              autoFocus
-              onChange={(e) => setEditedText(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && validateEdit()}
-            />
+            // Mode édition
+            <div className="flex gap-2 flex-1">
+              <input
+                type="text"
+                className="input input-sm flex-1"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                autoFocus
+              />
+              <select
+                className="select select-sm"
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value as Priority)}
+              >
+                <option value="Urgente">Urgente</option>
+                <option value="Moyenne">Moyenne</option>
+                <option value="Basse">Basse</option>
+              </select>
+            </div>
           ) : (
-            <span
-              className={`text-md font-bold ${
-                isSelected ? "line-through opacity-50" : ""
-              }`}
-            >
-              {todo.text}
-            </span>
-          )}
+            // Mode lecture
+            <>
+              <span className={`text-md ${isSelected ? "line-through opacity-50" : "font-bold"}`}>
+                {todo.text}
+              </span>
 
-          {/* 🏷️ Priorité */}
-          <span
-            className={`badge badge-sm badge-soft
-              ${
-                todo.priority === "Urgente"
-                  ? "badge-error"
-                  : todo.priority === "Moyenne"
-                  ? "badge-warning"
-                  : "badge-success"
-              }`}
-          >
-            {todo.priority}
-          </span>
+              <span
+                className={`badge badge-sm badge-soft
+                  ${todo.priority === "Urgente"
+                    ? "badge-error"
+                    : todo.priority === "Moyenne"
+                    ? "badge-warning"
+                    : "badge-success"}`}
+              >
+                {todo.priority}
+              </span>
+            </>
+          )}
         </div>
 
-        {/* 🎛️ Actions */}
         <div className="flex gap-2">
           {isEditing ? (
-            <button
-              onClick={validateEdit}
-              className="btn btn-sm btn-success btn-soft"
-            >
-              <Check className="w-4 h-4" />
-            </button>
+            // Boutons de sauvegarde/annulation
+            <>
+              <button
+                onClick={handleSaveEdit}
+                className="btn btn-sm btn-success btn-soft"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="btn btn-sm btn-ghost"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
           ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="btn btn-sm btn-info btn-soft"
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
+            // Boutons normaux
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="btn btn-sm btn-ghost"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onDelete}
+                className="btn btn-sm btn-error btn-soft"
+              >
+                <Trash className="w-4 h-4" />
+              </button>
+            </>
           )}
-
-          <button
-            onClick={onDelete}
-            className="btn btn-sm btn-error btn-soft"
-          >
-            <Trash className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </li>
-  )
-}
+  );
+};
 
-export default TodoItem
+export default TodoItem;

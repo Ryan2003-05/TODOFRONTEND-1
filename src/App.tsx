@@ -16,18 +16,18 @@ function App() {
   const [filter, setFilter] = useState<Priority | "Tous">("Tous")
   const [selectedTodos, setSelectedTodos] = useState<Set<number>>(new Set())
 
-  // ✅ Initialisation propre depuis localStorage
+  //  Initialisation propre depuis localStorage
   const [todos, setTodos] = useState<Todo[]>(() => {
     const saved = localStorage.getItem("todos")
     return saved ? JSON.parse(saved) : []
   })
 
-  // 💾 Sauvegarde locale
+  //  Sauvegarde locale
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos))
   }, [todos])
 
-  // ➕ Ajouter une tâche
+  //  Ajouter une tâche
   function addTodo() {
     if (!input.trim()) return
 
@@ -42,7 +42,7 @@ function App() {
     setPriority("Moyenne")
   }
 
-  // ❌ Supprimer une tâche
+  //  Supprimer une tâche
   function deleteTodo(id: number) {
     setTodos((prev) => prev.filter((todo) => todo.id !== id))
     setSelectedTodos((prev) => {
@@ -52,43 +52,43 @@ function App() {
     })
   }
 
-  // ✏️ Modifier une tâche
-  function updateTodo(id: number, newText: string) {
+  //  Modifier une tâche (AVEC priorité maintenant !)
+  function updateTodo(id: number, newText: string, newPriority: Priority) {
     setTodos((prev) =>
       prev.map((todo) =>
-        todo.id === id ? { ...todo, text: newText } : todo
+        todo.id === id ? { ...todo, text: newText, priority: newPriority } : todo
       )
     )
   }
 
-  // ☑️ Sélection / désélection
+  //  Sélection / désélection
   function toggleSelectTodo(id: number) {
-  setSelectedTodos((prev) => {
-    const copy = new Set(prev)
+    setSelectedTodos((prev) => {
+      const copy = new Set(prev)
 
-    if (copy.has(id)) {
-      copy.delete(id)
-    } else {
-      copy.add(id)
-    }
+      if (copy.has(id)) {
+        copy.delete(id)
+      } else {
+        copy.add(id)
+      }
 
-    return copy
-  })
- }
+      return copy
+    })
+  }
 
-  // 🧹 Supprimer les tâches sélectionnées
+  //  Supprimer les tâches sélectionnées
   function finishSelected() {
     setTodos((prev) => prev.filter((todo) => !selectedTodos.has(todo.id)))
     setSelectedTodos(new Set())
   }
 
-  // 🔍 Filtrage
+  //  Filtrage
   const filteredTodos =
     filter === "Tous"
       ? todos
       : todos.filter((todo) => todo.priority === filter)
 
-  // 📊 Compteurs
+  //  Compteurs
   const urgentCount = todos.filter((t) => t.priority === "Urgente").length
   const mediumCount = todos.filter((t) => t.priority === "Moyenne").length
   const lowCount = todos.filter((t) => t.priority === "Basse").length
@@ -96,6 +96,8 @@ function App() {
   return (
     <div className="flex justify-center">
       <div className="w-2/3 flex flex-col gap-4 my-12 bg-base-300 p-5 rounded-2xl">
+        
+        <h1 className="text-3xl font-bold text-center">Ma Todo Liste 📝</h1>
 
         {/* ➕ Ajout */}
         <div className="flex gap-4 flex-wrap">
@@ -105,6 +107,7 @@ function App() {
             placeholder="Ajouter une tâche..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addTodo()}
           />
 
           <select
@@ -122,7 +125,7 @@ function App() {
           </button>
         </div>
 
-        {/* 🎯 Filtres */}
+        {/*  Filtres */}
         <div className="flex justify-between items-center flex-wrap gap-3">
           <div className="flex gap-2 flex-wrap">
             <button
@@ -163,7 +166,7 @@ function App() {
           </button>
         </div>
 
-        {/* 📋 Liste */}
+        {/*  Liste */}
         {filteredTodos.length > 0 ? (
           <ul className="divide-y divide-primary/20">
             {filteredTodos.map((todo) => (
